@@ -64,7 +64,10 @@ public class HttpRequest {
     }
 
     public void setBody(HashMap<String, String> body) {
-        this.body = body;
+
+        if(HttpRequestMethod.GET != getHttpRequestMethod())
+            this.body = body;
+
     }
 
     public void setHeadersProperty(HttpURLConnection con){
@@ -75,32 +78,34 @@ public class HttpRequest {
         }
     }
 
-//    public HttpResponse request() throws HttpException, IOException {
-//
-//        String requestMassage = "";   // has the every thing in it.
-//        // connection.
-//        URL url = new URL(getUrl());
-//        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-//        con.setRequestMethod(getHttpRequestMethod().name());   // gives back the request method of user.
-//
-//        if(getHttpRequestMethod() != HttpRequestMethod.GET){
-//            // convert to JSON method.
-//        }
-//
-//        // TODO parameters.
-//        String parameters = ParameterStringBuilder.getParamsString(params);  // sets all current requests params in to the string.
-//
-//        // TODO Headers.
-//        String Headers = HeaderStringBuilder.getHeadersString(headers); //*** may be redundant!!!
-//        setHeadersProperty(con); // it will set all the headers for request.
-//
-//        con.setDoOutput(true);
-//        DataOutputStream out = new DataOutputStream(con.getOutputStream());  // for sending to the server.
-//
-//        out.writeBytes(requestMassage);
-//
-//        //return new HttpResponse();
-//    }
+    public HttpResponse request() throws HttpException, IOException {
+
+        String requestMassage = "";   // has the every thing in it.
+        // connection.
+        URL url = new URL(getUrl());
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod(getHttpRequestMethod().name());   // gives back the request method of user.
+
+        if(getHttpRequestMethod() != HttpRequestMethod.GET){
+            // convert to JSON method.
+            JSONFormat bodyJsonFormat = JSONFormat.JSONConvert(body);
+        }
+
+        // TODO parameters.
+        String parameters = ParameterStringBuilder.getParamsString(params);  // sets all current requests params in to the string.
+
+        // TODO Headers.
+        String Headers = HeaderStringBuilder.getHeadersString(headers); //*** may be redundant!!!
+        setHeadersProperty(con); // it will set all the headers for request.
+
+        con.setDoOutput(true);
+        DataOutputStream out = new DataOutputStream(con.getOutputStream());  // for sending to the server.
+
+        out.writeBytes(requestMassage);
+        //out.writeBytes(parammeters);  ????
+
+        return new HttpResponse();
+    }
 }
 
 /*

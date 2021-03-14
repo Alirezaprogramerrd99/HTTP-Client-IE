@@ -5,7 +5,7 @@ public class JSONFormat {
 
     private final String JSONContent;
 
-    JSONFormat(String JSONContent){
+    private JSONFormat(String JSONContent){
         this.JSONContent = JSONContent;
     }
 
@@ -17,6 +17,9 @@ public class JSONFormat {
         String result = "{\n";
 
         Iterator<Map.Entry<String, String>> itr = map.entrySet().iterator();
+
+        if (map.size() == 0)
+            return new JSONFormat("");
 
         while (itr.hasNext()) {
 
