@@ -7,20 +7,14 @@ public class TestHttpConnection {
 
     public static void main(String[] args){
 
-        try{
-            URL url = new URL("http://www.javatpoint.com/java-tutorial");
-            HttpURLConnection huc = (HttpURLConnection)url.openConnection();
-            //HttpRequest httpRequest = new HttpRequest()
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("key1", "1");
+        map.put("key2", "2");
 
-            int i = 0;
+        JSONFormat jsonFormat = JSONFormat.JSONConvert(map);
 
-            while(huc.getHeaderFieldKey(i) != null) {
-                System.out.println(huc.getHeaderFieldKey(i) + " = " + huc.getHeaderField(i));
-
-            }
+        System.out.println(jsonFormat.getJSONContent());
 
 
-            huc.disconnect();
-        }catch(Exception e){System.out.println(e);}
     }
 }
