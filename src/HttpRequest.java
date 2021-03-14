@@ -86,9 +86,16 @@ public class HttpRequest {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod(getHttpRequestMethod().name());   // gives back the request method of user.
 
+        con.setDoInput(true); // true indicates the server returns response
+
         if(getHttpRequestMethod() != HttpRequestMethod.GET){
             // convert to JSON method.
             JSONFormat bodyJsonFormat = JSONFormat.JSONConvert(body);
+            con.setDoOutput(true);
+        }
+
+        else{
+            con.setDoOutput(false); // false indicates this is a GET request
         }
 
         // TODO parameters.
@@ -98,13 +105,14 @@ public class HttpRequest {
         String Headers = HeaderStringBuilder.getHeadersString(headers); //*** may be redundant!!!
         setHeadersProperty(con); // it will set all the headers for request.
 
-        con.setDoOutput(true);
-        DataOutputStream out = new DataOutputStream(con.getOutputStream());  // for sending to the server.
+        int status = con.getResponseCode();
 
-        out.writeBytes(requestMassage);
-        //out.writeBytes(parammeters);  ????
+        //DataOutputStream out = new DataOutputStream(con.getOutputStream());  // for sending to the server.
 
-        return new HttpResponse();
+        //out.writeBytes(requestMassage);
+        //out.writeBytes(parammeters);  only ????
+
+        return new HttpResponse(status, con.getHeaderFields(), con.getContentEncoding());
     }
 }
 

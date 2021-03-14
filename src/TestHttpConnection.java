@@ -7,13 +7,16 @@ public class TestHttpConnection {
 
     public static void main(String[] args){
 
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("key1", "1");
-        map.put("key2", "2");
+        HttpRequest httpRequest = new HttpRequest("https://www.tutorialspoint.com/http/http_requests.htm");
 
-        JSONFormat jsonFormat = JSONFormat.JSONConvert(map);
+        try {
+            HttpResponse httpResponse = httpRequest.request();
+            System.out.println(httpResponse.getStatus());
+        }
 
-        System.out.println(jsonFormat.getJSONContent());
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
 
     }
