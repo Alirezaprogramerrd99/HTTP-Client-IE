@@ -19,7 +19,7 @@ public class HttpRequest {
         this(url, httpRequestMethod, new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 
-    public HttpRequest(String url, HttpRequestMethod httpRequestMethod, HashMap<String, 
+    public HttpRequest(String url, HttpRequestMethod httpRequestMethod, HashMap<String,
             String> headers, HashMap<String, String> params, HashMap<String, String> body) {
 
         this.url = url;
@@ -53,11 +53,17 @@ public class HttpRequest {
         this.headers = headers;
     }
 
+    void setHeader(String header, String val){
+        headers.put(header, val);
+    }
+
     public HashMap<String, String> getParams() {
         return this.params;
     }
 
-    public void setParams(String param, String val) { params.put(param, val); }
+    public void setParams(String param, String val) {
+        params.put(param, val);
+    }
 
     public HashMap<String, String> getBody() {
         return this.body;
@@ -65,14 +71,14 @@ public class HttpRequest {
 
     public void setBody(HashMap<String, String> body) {
 
-        if(HttpRequestMethod.GET != getHttpRequestMethod())
+        if (HttpRequestMethod.GET != getHttpRequestMethod())
             this.body = body;
 
     }
 
-    public void setHeadersProperty(HttpURLConnection con){
+    public void setHeadersProperty(HttpURLConnection con) {
 
-        for (Map.Entry<String, String> entry: headers.entrySet()) {
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
 
             con.setRequestProperty(entry.getKey(), entry.getValue());
         }
@@ -80,39 +86,44 @@ public class HttpRequest {
 
     public HttpResponse request() throws HttpException, IOException {
 
-        String requestMassage = "";   // has the every thing in it.
-        // connection.
+        JSONFormat bodyJsonFormat = null;
+
+        //----- connection.
         URL url = new URL(getUrl());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod(getHttpRequestMethod().name());   // gives back the request method of user.
+        con.setRequestMethod(getHttpRequestMethod().name());        // gives back the request method of user.
 
-        con.setDoInput(true); // true indicates the server returns response
+        con.setDoInput(true);       // true indicates the server returns response
 
-        if(getHttpRequestMethod() != HttpRequestMethod.GET){
+        if (getHttpRequestMethod() != HttpRequestMethod.GET) {
             // convert to JSON method.
-            JSONFormat bodyJsonFormat = JSONFormat.JSONConvert(body);
+             bodyJsonFormat = JSONFormat.JSONConvert(body);
+            //*** should I check params size or null condition ?!
             con.setDoOutput(true);
-        }
-
-        else{
+        } else {
             con.setDoOutput(false); // false indicates this is a GET request
         }
 
-        // TODO parameters.
         String parameters = ParameterStringBuilder.getParamsString(params);  // sets all current requests params in to the string.
 
-        // TODO Headers.
         String Headers = HeaderStringBuilder.getHeadersString(headers); //*** may be redundant!!!
-        setHeadersProperty(con); // it will set all the headers for request.
+        setHeadersProperty(con);                    // it will set all the headers for request.
 
+        DataOutputStream out = new DataOutputStream(con.getOutputStream());         // for sending to the server.
+        out.writeBytes(parameters);             // sending parameters to Server.
+        out.flush();
+
+        if (bodyJsonFormat != null) {           // sending body(JSON Format) to the server.
+            out.writeBytes(bodyJsonFormat.getJSONContent());
+            out.flush();
+        }
+
+        out.close();
+
+        //----------------------------------- check the server response part -------------------------------
         int statusCode = con.getResponseCode();
-
         HttpResponse response = new HttpResponse(statusCode, con.getHeaderFields(), con.getContentEncoding());
         validateResponse(response, statusCode);
-        //DataOutputStream out = new DataOutputStream(con.getOutputStream());  // for sending to the server.
-
-        //out.writeBytes(requestMassage);
-        //out.writeBytes(parammeters);  only ????
 
         return response;
     }
