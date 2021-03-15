@@ -105,14 +105,24 @@ public class HttpRequest {
         String Headers = HeaderStringBuilder.getHeadersString(headers); //*** may be redundant!!!
         setHeadersProperty(con); // it will set all the headers for request.
 
-        int status = con.getResponseCode();
+        int statusCode = con.getResponseCode();
 
+        HttpResponse response = new HttpResponse(statusCode, con.getHeaderFields(), con.getContentEncoding());
+        validateResponse(response, statusCode);
         //DataOutputStream out = new DataOutputStream(con.getOutputStream());  // for sending to the server.
 
         //out.writeBytes(requestMassage);
         //out.writeBytes(parammeters);  only ????
 
-        return new HttpResponse(status, con.getHeaderFields(), con.getContentEncoding());
+        return response;
+    }
+
+    private void validateResponse(HttpResponse response, int responseCode) throws HttpException {
+
+        if (responseCode <= 499 && responseCode >= 400)
+            throw new HttpException("Client error!", response);
+        else if (responseCode <= 599 && responseCode >= 500)
+            throw new HttpException("Server error!", response);
     }
 }
 
