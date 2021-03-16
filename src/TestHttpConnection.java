@@ -7,7 +7,7 @@ public class TestHttpConnection {
 
     public static void main(String[] args){
 
-        HttpRequest httpRequest = new HttpRequest("https://www.tutorialspoint.com/http/http_requests.htm");
+        HttpRequest httpRequest = new HttpRequest("https://www-users.cs.umn.edu/~kumar001/dmbook/firsted.php");
 
         try {  // must write class to do this printing works..
             HttpResponse httpResponse = httpRequest.request();

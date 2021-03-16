@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,10 +70,10 @@ public class HttpRequest {
         return this.body;
     }
 
-    public void setBody(HashMap<String, String> body) {
+    public void setBody(String name, String val) {
 
         if (HttpRequestMethod.GET != getHttpRequestMethod())
-            this.body = body;
+            body.put(name, val);
 
     }
 
@@ -87,7 +88,7 @@ public class HttpRequest {
     public HttpResponse request() throws HttpException, IOException {
 
         JSONFormat bodyJsonFormat = null;
-
+        DataOutputStream out = null;
         //----- connection.
         URL url = new URL(getUrl());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -109,20 +110,28 @@ public class HttpRequest {
         String Headers = HeaderStringBuilder.getHeadersString(headers); //*** may be redundant!!!
         setHeadersProperty(con);                    // it will set all the headers for request.
 
-        DataOutputStream out = new DataOutputStream(con.getOutputStream());         // for sending to the server.
-        out.writeBytes(parameters);             // sending parameters to Server.
-        out.flush();
+        if (params.size() > 0) {
+            out = new DataOutputStream(con.getOutputStream());         // for sending to the server.
+            out.writeBytes(parameters);             // sending parameters to Server.
+            out.flush();
+        }
 
         if (bodyJsonFormat != null) {           // sending body(JSON Format) to the server.
+
             out.writeBytes(bodyJsonFormat.getJSONContent());
             out.flush();
         }
 
-        out.close();
+        if (out != null) {
+
+            out.close();
+        }
 
         //----------------------------------- check the server response part -------------------------------
         int statusCode = con.getResponseCode();
-        HttpResponse response = new HttpResponse(statusCode, con.getHeaderFields(), con.getContentEncoding());
+        String responseBody = readResponseContent(con);
+        System.out.println(responseBody);
+        HttpResponse response = new HttpResponse(statusCode, con.getHeaderFields(), responseBody);
         validateResponse(response, statusCode);
 
         return response;
@@ -135,6 +144,28 @@ public class HttpRequest {
         else if (responseCode <= 599 && responseCode >= 500)
             throw new HttpException("Server error!", response);
     }
+
+    private String readResponseContent(HttpURLConnection connection) throws IOException{
+
+        String responseLine = null;
+        StringBuilder responseMassage = new StringBuilder();
+
+        try(BufferedReader br = new BufferedReader(
+
+                new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+
+
+            System.out.println("server body:");
+            while ((responseLine = br.readLine()) != null) {
+
+                responseMassage.append(responseLine.trim());
+                responseMassage.append("\n");   // ***
+            }
+
+        }
+        return responseMassage.toString();
+    }
+
 }
 
 /*

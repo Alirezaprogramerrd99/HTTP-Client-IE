@@ -10,5 +10,9 @@ public class HttpRequestFormater {
         request.setParams(key, value);
     }
 
+    public static void addToBody(HttpRequest request, String key, String value){
+        request.setBody(key, value);
+    }
+
 
 }
