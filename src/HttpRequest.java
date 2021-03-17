@@ -96,6 +96,7 @@ public class HttpRequest {
 
         JSONFormat bodyJsonFormat = null;
         DataOutputStream out = null;
+        String parameters = "";
         //---------------------------------- connection.
         URL url = new URL(getUrl());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -107,17 +108,17 @@ public class HttpRequest {
             // convert to JSON method.
              bodyJsonFormat = JSONFormat.JSONConvert(body);
             //*** should I check params size or null condition ?!
-            con.setDoOutput(true);
-            out = new DataOutputStream(con.getOutputStream());
 
         } else {
-            con.setDoOutput(false); // false indicates this is a GET request
+            // false indicates this is a GET request
+            parameters = ParameterStringBuilder.getParamsString(params);  // sets all current requests params in to the string.
         }
-
-        String parameters = ParameterStringBuilder.getParamsString(params);  // sets all current requests params in to the string.
 
         String Headers = HeaderStringBuilder.getHeadersString(headers); //*** may be redundant!!!
         setHeadersProperty(con);                    // it will set all the headers for request.
+
+        con.setDoOutput(true);
+        out = new DataOutputStream(con.getOutputStream());   // calls connect method in side of it.
 
         if (params.size() > 0) {
                    // for sending to the server.
@@ -130,16 +131,12 @@ public class HttpRequest {
             out.writeBytes(bodyJsonFormat.getJSONContent());
             out.flush();
         }
-
-        if (out != null) {
-
             out.close();
-        }
 
         //----------------------------------- check the server response part -------------------------------
         int statusCode = con.getResponseCode();
         String responseBody = readResponseContent(con);
-        System.out.println(responseBody);
+        //System.out.println(responseBody);
         HttpResponse response = new HttpResponse(statusCode, con.getHeaderFields(), responseBody);
         validateResponse(response, statusCode);
 
