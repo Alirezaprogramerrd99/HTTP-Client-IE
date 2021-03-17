@@ -70,12 +70,19 @@ public class HttpRequest {
         return this.body;
     }
 
+    public void setBody(HashMap<String, String> body) {
+
+        if(HttpRequestMethod.GET != getHttpRequestMethod())
+        this.body = body;
+    }
+
     public void setBody(String name, String val) {
 
         if (HttpRequestMethod.GET != getHttpRequestMethod())
             body.put(name, val);
 
     }
+
 
     public void setHeadersProperty(HttpURLConnection con) {
 
@@ -89,7 +96,7 @@ public class HttpRequest {
 
         JSONFormat bodyJsonFormat = null;
         DataOutputStream out = null;
-        //----- connection.
+        //---------------------------------- connection.
         URL url = new URL(getUrl());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod(getHttpRequestMethod().name());        // gives back the request method of user.
@@ -101,6 +108,8 @@ public class HttpRequest {
              bodyJsonFormat = JSONFormat.JSONConvert(body);
             //*** should I check params size or null condition ?!
             con.setDoOutput(true);
+            out = new DataOutputStream(con.getOutputStream());
+
         } else {
             con.setDoOutput(false); // false indicates this is a GET request
         }
@@ -111,7 +120,7 @@ public class HttpRequest {
         setHeadersProperty(con);                    // it will set all the headers for request.
 
         if (params.size() > 0) {
-            out = new DataOutputStream(con.getOutputStream());         // for sending to the server.
+                   // for sending to the server.
             out.writeBytes(parameters);             // sending parameters to Server.
             out.flush();
         }
@@ -154,8 +163,6 @@ public class HttpRequest {
 
                 new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
 
-
-            System.out.println("server body:");
             while ((responseLine = br.readLine()) != null) {
 
                 responseMassage.append(responseLine.trim());
